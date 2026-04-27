@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Sistema de Recomendação de Livros Brasileiros</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid #e94560;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #e94560;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: #0f3460;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: #e94560;
+        }
+
+        .tab-btn.active {
+            background: #e94560;
+        }
+
+        .tab-content {
+            display: none;
+            background: #0f3460;
+            padding: 30px;
+            border-radius: 12px;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            color: #e94560;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #a0a0a0;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #1a1a2e;
+            border-radius: 8px;
+            background: #1a1a2e;
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #e94560;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #ff6b6b;
+            transform: translateY(-2px);
+        }
+
+        .user-info {
+            background: #1a1a2e;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .user-info span {
+            font-size: 1.1rem;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .book-card {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #e94560;
+            transition: transform 0.3s;
+        }
+
+        .book-card:hover {
+            transform: translateX(5px);
+        }
+
+        .book-card h4 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .book-card p {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .book-card .categoria {
+            display: inline-block;
+            background: #e94560;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+
+        .stars {
+            display: flex;
+            gap: 5px;
+            margin: 15px 0;
+        }
+
+        .star {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #1a1a2e;
+            transition: color 0.2s;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #ffd700;
+        }
+
+        .recommendation-card {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .rank {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e94560;
+            min-width: 50px;
+        }
+
+        .rec-details {
+            flex: 1;
+        }
+
+        .rec-details h4 {
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .rec-details p {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        .score {
+            background: #e94560;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-row select {
+            max-width: 200px;
+        }
+
+        .rating-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .rating-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: #16213e;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .rating-item .stars-display {
+            color: #ffd700;
+        }
+
+        .about-section {
+            line-height: 1.8;
+        }
+
+        .about-section h3 {
+            color: #e94560;
+            margin: 20px 0 10px;
+        }
+
+        .about-section ul {
+            margin-left: 20px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background: #2ecc71;
+        }
+
+        .alert-error {
+            background: #e74c3c;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #a0a0a0;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Livraria Brasileira</h1>
+            <p>Sistema de Recomendação por Conteúdo com TF-IDF</p>
+        </header>
+
+        <div class="user-info" id="userInfo">
+            <span id="userDisplay">👤 Nenhum usuário logado</span>
+            <button onclick="logout()" id="logoutBtn" class="hidden">Sair</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('login')">👤 Login</button>
+            <button class="tab-btn" onclick="showTab('catalogo')">📖 Catálogo</button>
+            <button class="tab-btn" onclick="showTab('avaliar')">⭐ Avaliar</button>
+            <button class="tab-btn" onclick="showTab('recomendacoes')">🎯 Recomendações</button>
+            <button class="tab-btn" onclick="showTab('sobre')">ℹ️ Sobre</button>
+        </div>
+
+        <!-- Tab Login -->
+        <div class="tab-content active" id="tab-login">
+            <div class="card">
+                <h3>Selecionar Usuário Existente</h3>
+                <label>Usuário:</label>
+                <select id="userSelect">
+                    <option value="">Carregando...</option>
+                </select>
+                <button onclick="login()">Entrar</button>
+            </div>
+
+            <div class="card">
+                <h3>Cadastrar Novo Usuário</h3>
+                <label>Nome completo:</label>
+                <input type="text" id="newUserName" placeholder="Digite seu nome">
+                <button onclick="register()">Cadastrar</button>
+            </div>
+        </div>
+
+        <!-- Tab Catálogo -->
+        <div class="tab-content" id="tab-catalogo">
+            <div class="filter-row">
+                <div>
+                    <label>Filtrar por categoria:</label>
+                    <select id="categoryFilter" onchange="filterBooks()">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+            </div>
+            <div class="books-grid" id="booksGrid">
+                <!-- Livros serão carregados aqui -->
+            </div>
+        </div>
+
+        <!-- Tab Avaliar -->
+        <div class="tab-content" id="tab-avaliar">
+            <div class="card">
+                <h3>Avaliar um Livro</h3>
+                <label>Selecione o livro:</label>
+                <select id="bookSelect">
+                    <option value="">Selecione um livro</option>
+                </select>
+                
+                <label>Sua nota:</label>
+                <div class="stars" id="starsContainer">
+                    <span class="star" onclick="setRating(1)">★</span>
+                    <span class="star" onclick="setRating(2)">★</span>
+                    <span class="star" onclick="setRating(3)">★</span>
+                    <span class="star" onclick="setRating(4)">★</span>
+                    <span class="star" onclick="setRating(5)">★</span>
+                </div>
+                
+                <button onclick="submitRating()">Enviar Avaliação</button>
+            </div>
+
+            <div class="card">
+                <h3>Suas Avaliações</h3>
+                <div class="rating-list" id="ratingsList">
+                    <p>Faça login para ver suas avaliações</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Recomendações -->
+        <div class="tab-content" id="tab-recomendacoes">
+            <div class="card">
+                <h3>Gerar Recomendações Personalizadas</h3>
+                <label>Quantidade de recomendações:</label>
+                <input type="number" id="numRecommendations" value="5" min="1" max="20">
+                <button onclick="getRecommendations()">🎯 Gerar Recomendações</button>
+            </div>
+
+            <div id="recommendationsContainer">
+                <!-- Recomendações serão exibidas aqui -->
+            </div>
+        </div>
+
+        <!-- Tab Sobre -->
+        <div class="tab-content" id="tab-sobre">
+            <div class="about-section">
+                <h3>📚 Sobre o Projeto</h3>
+                <p>Este sistema implementa um modelo de recomendação por conteúdo utilizando o algoritmo TF-IDF 
+                   (Term Frequency - Inverse Document Frequency) para recomendar livros da literatura brasileira.</p>
+
+                <h3>🔬 Como Funciona</h3>
+                <ul>
+                    <li>Cada livro possui 3 características: autor, tema e categoria</li>
+                    <li>O algoritmo TF-IDF calcula a relevância das palavras em cada perfil</li>
+                    <li>A similaridade de cosseno mede a semelhança entre preferências</li>
+                    <li>Recomendações são baseadas nos livros melhor avaliados pelo usuário</li>
+                </ul>
+
+                <h3>📊 Dados do Sistema</h3>
+                <ul>
+                    <li>50 livros da literatura brasileira</li>
+                    <li>100 usuários de treinamento</li>
+                    <li>Matriz de utilidade com 5.000 avaliações</li>
+                    <li>Escala de avaliação: 1 a 5 estrelas</li>
+                </ul>
+
+                <h3>👥 Integrantes</h3>
+                <ul>
+                    <li>Leandro Coelho da Silva</li>
+                    <li>Paulo Henrique Borges Martins</li>
+                    <li>Valeria Alexandra Guevara Parra</li>
+                </ul>
+
+                <h3>🎓 Disciplina</h3>
+                <p>Introdução à Inteligência Artificial - UnB 2026/1<br>
+                   Professor: Díbio</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Universidade de Brasília - Departamento de Ciência da Computação - 2026</p>
+        </footer>
+    </div>
+
+    <script>
+        // Estado da aplicação
+        let currentUser = null;
+        let currentRating = 0;
+        let allBooks = [];
+        let allUsers = [];
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+            loadBooks();
+        });
+
+        // Funções de navegação
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Carregar usuários
+        async function loadUsers() {
+            const response = await fetch('/api/users');
+            allUsers = await response.json();
+            
+            const select = document.getElementById('userSelect');
+            select.innerHTML = '<option value="">Selecione um usuário</option>';
+            allUsers.forEach(user => {
+                select.innerHTML += `<option value="${user.id}">${user.id} - ${user.nome}</option>`;
+            });
+        }
+
+        // Carregar livros
+        async function loadBooks() {
+            const response = await fetch('/api/books');
+            allBooks = await response.json();
+            
+            // Preencher filtro de categorias
+            const categories = [...new Set(allBooks.map(b => b.categoria))].sort();
+            const categoryFilter = document.getElementById('categoryFilter');
+            categories.forEach(cat => {
+                categoryFilter.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+            
+            // Preencher select de livros para avaliação
+            const bookSelect = document.getElementById('bookSelect');
+            allBooks.forEach(book => {
+                bookSelect.innerHTML += `<option value="${book.id}">${book.nome} - ${book.autor}</option>`;
+            });
+            
+            displayBooks(allBooks);
+        }
+
+        // Exibir livros
+        function displayBooks(books) {
+            const grid = document.getElementById('booksGrid');
+            grid.innerHTML = '';
+            
+            books.forEach(book => {
+                grid.innerHTML += `
+                    <div class="book-card">
+                        <h4>${book.nome}</h4>
+                        <p>📝 ${book.autor}</p>
+                        <p>🏷️ ${book.tema}</p>
+                        <span class="categoria">${book.categoria}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Filtrar livros
+        function filterBooks() {
+            const category = document.getElementById('categoryFilter').value;
+            if (category) {
+                displayBooks(allBooks.filter(b => b.categoria === category));
+            } else {
+                displayBooks(allBooks);
+            }
+        }
+
+        // Login
+        function login() {
+            const select = document.getElementById('userSelect');
+            const userId = parseInt(select.value);
+            
+            if (isNaN(userId)) {
+                alert('Selecione um usuário!');
+                return;
+            }
+            
+            currentUser = allUsers.find(u => u.id === userId);
+            updateUserDisplay();
+            loadUserRatings();
+            alert(`Bem-vindo(a), ${currentUser.nome}!`);
+        }
+
+        // Cadastrar
+        async function register() {
+            const name = document.getElementById('newUserName').value.trim();
+            
+            if (!name || name.length < 3) {
+                alert('Digite um nome válido (mínimo 3 caracteres)!');
+                return;
+            }
+            
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome: name })
+            });
+            
+            const newUser = await response.json();
+            
+            if (newUser.error) {
+                alert(newUser.error);
+                return;
+            }
+            
+            allUsers.push(newUser);
+            currentUser = newUser;
+            
+            // Atualizar select
+            const select = document.getElementById('userSelect');
+            select.innerHTML += `<option value="${newUser.id}">${newUser.id} - ${newUser.nome}</option>`;
+            
+            document.getElementById('newUserName').value = '';
+            updateUserDisplay();
+            
+            alert(`Cadastrado com sucesso! Seu ID: ${newUser.id}\n\nAvalie alguns livros para receber recomendações!`);
+        }
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            updateUserDisplay();
+        }
+
+        // Atualizar exibição do usuário
+        function updateUserDisplay() {
+            const display = document.getElementById('userDisplay');
+            const logoutBtn = document.getElementById('logoutBtn');
+            
+            if (currentUser) {
+                display.textContent = `👤 ${currentUser.nome} (ID: ${currentUser.id})`;
+                logoutBtn.classList.remove('hidden');
+            } else {
+                display.textContent = '👤 Nenhum usuário logado';
+                logoutBtn.classList.add('hidden');
+            }
+        }
+
+        // Sistema de estrelas
+        function setRating(rating) {
+            currentRating = rating;
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // Enviar avaliação
+        async function submitRating() {
+            if (!currentUser) {
+                alert('Faça login primeiro!');
+                return;
+            }
+            
+            const bookId = parseInt(document.getElementById('bookSelect').value);
+            
+            if (isNaN(bookId)) {
+                alert('Selecione um livro!');
+                return;
+            }
+            
+            if (currentRating === 0) {
+                alert('Selecione uma nota!');
+                return;
+            }
+            
+            const response = await fetch('/api/rate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: currentUser.id,
+                    bookId: bookId,
+                    rate: currentRating
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.error) {
+                alert(result.error);
+                return;
+            }
+            
+            alert('Avaliação registrada com sucesso!');
+            loadUserRatings();
+            setRating(0);
+        }
+
+        // Carregar avaliações do usuário
+        async function loadUserRatings() {
+            if (!currentUser) return;
+            
+            const response = await fetch(`/api/ratings/${currentUser.id}`);
+            const ratings = await response.json();
+            
+            const container = document.getElementById('ratingsList');
+            
+            if (ratings.length === 0) {
+                container.innerHTML = '<p>Você ainda não avaliou nenhum livro.</p>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            ratings.sort((a, b) => b.rate - a.rate);
+            
+            ratings.forEach(r => {
+                container.innerHTML += `
+                    <div class="rating-item">
+                        <div>
+                            <strong>${r.book.nome}</strong>
+                            <p style="color: #a0a0a0; font-size: 0.9rem;">${r.book.autor}</p>
+                        </div>
+                        <span class="stars-display">${'★'.repeat(r.rate)}${'☆'.repeat(5 - r.rate)}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Obter recomendações
+        async function getRecommendations() {
+            if (!currentUser) {
+                alert('Faça login primeiro!');
+                return;
+            }
+            
+            const n = document.getElementById('numRecommendations').value;
+            const response = await fetch(`/api/recommend/${currentUser.id}?n=${n}`);
+            const recommendations = await response.json();
+            
+            const container = document.getElementById('recommendationsContainer');
+            container.innerHTML = `<h3 style="color: #e94560; margin-bottom: 20px;">🎯 Recomendações para ${currentUser.nome}</h3>`;
+            
+            recommendations.forEach((rec, index) => {
+                container.innerHTML += `
+                    <div class="recommendation-card">
+                        <div class="rank">#${index + 1}</div>
+                        <div class="rec-details">
+                            <h4>${rec.book.nome}</h4>
+                            <p>📝 ${rec.book.autor}</p>
+                            <p>📂 ${rec.book.categoria}</p>
+                            <p>🏷️ ${rec.book.tema}</p>
+                        </div>
+                        <div class="score">${rec.score}</div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
